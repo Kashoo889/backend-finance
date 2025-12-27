@@ -17,46 +17,74 @@ export const validate = (req, res, next) => {
 
 /**
  * Validation rules for Saudi Entry
+ * All fields are optional to support partial updates
  */
 export const validateSaudiEntry = [
-  body('date').trim().notEmpty().withMessage('Date is required'),
-  body('time').trim().notEmpty().withMessage('Time is required'),
-  body('refNo')
+  body('date')
+    .optional({ checkFalsy: true })
     .trim()
     .notEmpty()
-    .withMessage('Reference number is required')
+    .withMessage('Date cannot be empty'),
+  body('time')
+    .optional({ checkFalsy: true })
+    .trim()
+    .notEmpty()
+    .withMessage('Time cannot be empty'),
+  body('refNo')
+    .optional({ checkFalsy: true })
+    .trim()
+    .notEmpty()
+    .withMessage('Reference number cannot be empty')
     .isUppercase()
     .withMessage('Reference number should be uppercase'),
   body('pkrAmount')
+    .optional({ checkFalsy: true })
     .isFloat({ min: 0 })
     .withMessage('PKR amount must be a positive number'),
   body('riyalRate')
+    .optional({ checkFalsy: true })
     .isFloat({ min: 0.01 })
     .withMessage('Riyal rate must be greater than zero'),
   body('submittedSar')
-    .optional()
+    .optional({ checkFalsy: true })
     .isFloat({ min: 0 })
     .withMessage('Submitted SAR must be a positive number'),
-  body('reference2').optional().trim(),
+  body('reference2')
+    .optional({ checkFalsy: true })
+    .trim(),
   validate,
 ];
 
 /**
  * Validation rules for Special Entry
+ * All fields are optional to support partial updates
  */
 export const validateSpecialEntry = [
-  body('userName').trim().notEmpty().withMessage('User name is required'),
-  body('date').trim().notEmpty().withMessage('Date is required'),
+  body('userName')
+    .optional({ checkFalsy: true })
+    .trim()
+    .notEmpty()
+    .withMessage('User name cannot be empty'),
+  body('date')
+    .optional({ checkFalsy: true })
+    .trim()
+    .notEmpty()
+    .withMessage('Date cannot be empty'),
   body('balanceType')
+    .optional({ checkFalsy: true })
     .isIn(['Online', 'Cash'])
     .withMessage('Balance type must be either Online or Cash'),
   body('nameRupees')
+    .optional({ checkFalsy: true })
     .isFloat({ min: 0 })
     .withMessage('Name rupees must be a positive number'),
   body('submittedRupees')
-    .optional()
+    .optional({ checkFalsy: true })
     .isFloat({ min: 0 })
     .withMessage('Submitted rupees must be a positive number'),
+  body('referencePerson')
+    .optional({ checkFalsy: true })
+    .trim(),
   validate,
 ];
 
@@ -93,18 +121,24 @@ export const validateBank = [
 
 /**
  * Validation rules for Bank Ledger Entry
+ * All fields are optional to support partial updates
  */
 export const validateBankLedgerEntry = [
-  body('date').trim().notEmpty().withMessage('Date is required'),
+  body('date')
+    .optional({ checkFalsy: true })
+    .trim()
+    .notEmpty()
+    .withMessage('Date cannot be empty'),
   body('referenceType')
+    .optional({ checkFalsy: true })
     .isIn(['Online', 'Cash'])
     .withMessage('Reference type must be either Online or Cash'),
   body('amountAdded')
-    .optional()
+    .optional({ checkFalsy: true })
     .isFloat({ min: 0 })
     .withMessage('Amount added must be a positive number'),
   body('amountWithdrawn')
-    .optional()
+    .optional({ checkFalsy: true })
     .isFloat({ min: 0 })
     .withMessage('Amount withdrawn must be a positive number'),
   validate,

@@ -4,13 +4,20 @@
  */
 
 /**
- * Calculate Saudi balance: (PKR Amount ÷ Riyal Rate) - Submitted SAR
+ * Calculate Riyal Amount: PKR Amount ÷ Riyal Rate
  */
-export const calculateSaudiBalance = (pkrAmount, riyalRate, submittedSar) => {
+export const calculateRiyalAmount = (pkrAmount, riyalRate) => {
   if (!riyalRate || riyalRate === 0) {
     throw new Error('Riyal rate cannot be zero');
   }
-  return (pkrAmount / riyalRate) - submittedSar;
+  return pkrAmount / riyalRate;
+};
+
+/**
+ * Calculate Saudi balance: Riyal Amount - Submitted SAR
+ */
+export const calculateSaudiBalance = (riyalAmount, submittedSar) => {
+  return riyalAmount - submittedSar;
 };
 
 /**

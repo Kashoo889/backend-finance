@@ -31,6 +31,11 @@ const specialEntrySchema = new mongoose.Schema(
       min: [0, 'Submitted rupees cannot be negative'],
       default: 0,
     },
+    referencePerson: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     balance: {
       type: Number,
       default: 0,

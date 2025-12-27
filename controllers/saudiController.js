@@ -1,5 +1,5 @@
 import SaudiEntry from '../models/SaudiEntry.js';
-import { calculateSaudiBalance } from '../utils/calculations.js';
+import { calculateRiyalAmount, calculateSaudiBalance } from '../utils/calculations.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 
 /**
@@ -46,15 +46,19 @@ export const getSaudiEntry = asyncHandler(async (req, res) => {
 export const createSaudiEntry = asyncHandler(async (req, res) => {
   const { pkrAmount, riyalRate, submittedSar } = req.body;
 
-  // Calculate balance server-side
-  const balance = calculateSaudiBalance(
+  // Calculate riyalAmount and balance server-side
+  const riyalAmount = calculateRiyalAmount(
     parseFloat(pkrAmount),
-    parseFloat(riyalRate),
+    parseFloat(riyalRate)
+  );
+  const balance = calculateSaudiBalance(
+    riyalAmount,
     parseFloat(submittedSar || 0)
   );
 
   const entry = await SaudiEntry.create({
     ...req.body,
+    riyalAmount,
     balance,
   });
 
@@ -72,23 +76,32 @@ export const createSaudiEntry = asyncHandler(async (req, res) => {
 export const updateSaudiEntry = asyncHandler(async (req, res) => {
   const { pkrAmount, riyalRate, submittedSar } = req.body;
 
-  // Recalculate balance if relevant fields are updated
-  let updateData = { ...req.body };
-  if (pkrAmount !== undefined || riyalRate !== undefined || submittedSar !== undefined) {
-    const existingEntry = await SaudiEntry.findById(req.params.id);
-    if (!existingEntry) {
-      return res.status(404).json({
-        success: false,
-        error: 'Saudi entry not found',
-      });
-    }
-
-    const finalPkrAmount = pkrAmount !== undefined ? parseFloat(pkrAmount) : existingEntry.pkrAmount;
-    const finalRiyalRate = riyalRate !== undefined ? parseFloat(riyalRate) : existingEntry.riyalRate;
-    const finalSubmittedSar = submittedSar !== undefined ? parseFloat(submittedSar) : existingEntry.submittedSar;
-
-    updateData.balance = calculateSaudiBalance(finalPkrAmount, finalRiyalRate, finalSubmittedSar);
+  // Get existing entry first
+  const existingEntry = await SaudiEntry.findById(req.params.id);
+  if (!existingEntry) {
+    return res.status(404).json({
+      success: false,
+      error: 'Saudi entry not found',
+    });
   }
+
+  // Prepare update data
+  let updateData = { ...req.body };
+
+  // Always recalculate riyalAmount and balance when relevant fields are updated
+  // Use provided values or existing values
+  const finalPkrAmount = pkrAmount !== undefined ? parseFloat(pkrAmount) : existingEntry.pkrAmount;
+  const finalRiyalRate = riyalRate !== undefined ? parseFloat(riyalRate) : existingEntry.riyalRate;
+  const finalSubmittedSar = submittedSar !== undefined ? parseFloat(submittedSar) : existingEntry.submittedSar;
+
+  // Calculate: PKR AMOUNT / RIYAL RATE = RIYAL AMOUNT
+  const riyalAmount = calculateRiyalAmount(finalPkrAmount, finalRiyalRate);
+  // Calculate: RIYAL AMOUNT - SUBMITTED SAR = Balance
+  const balance = calculateSaudiBalance(riyalAmount, finalSubmittedSar);
+
+  // Always update riyalAmount and balance to ensure consistency
+  updateData.riyalAmount = riyalAmount;
+  updateData.balance = balance;
 
   const entry = await SaudiEntry.findByIdAndUpdate(req.params.id, updateData, {
     new: true,
