@@ -31,11 +31,13 @@ const app = express();
 // Middleware
 // CORS configuration - allow frontend URLs
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL] 
+  origin: process.env.NODE_ENV === 'production'
+    ? ['https://frontend-finance12.vercel.app']
     : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:8080'],
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
 app.use(express.json());
