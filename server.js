@@ -29,7 +29,15 @@ if (missingEnvVars.length > 0) {
 const app = express();
 
 // Middleware
-app.use(cors());
+// CORS configuration - allow frontend URLs
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || process.env.NODE_ENV === 'production' 
+    ? [process.env.FRONTEND_URL] 
+    : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:8080'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
