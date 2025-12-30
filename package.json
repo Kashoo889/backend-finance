@@ -9,6 +9,7 @@
     "dev": "nodemon server.js",
     "seed:admin": "node scripts/seedAdmin.js",
     "seed:user": "node scripts/seedUser.js",
+    "update:user-role": "node scripts/updateUserRole.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["mern", "api", "finance", "dashboard"],
