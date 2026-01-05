@@ -111,21 +111,12 @@ export const updateBank = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Delete Bank
+ * @desc    Delete Bank (with cascade delete of ledger entries)
  * @route   DELETE /api/traders/:traderId/banks/:bankId
  * @access  Public
  */
 export const deleteBank = asyncHandler(async (req, res) => {
-  // Check if bank has ledger entries
-  const entries = await BankLedgerEntry.find({ bank: req.params.bankId });
-  if (entries.length > 0) {
-    return res.status(400).json({
-      success: false,
-      error: 'Cannot delete bank with existing ledger entries. Please delete entries first.',
-    });
-  }
-
-  const bank = await Bank.findOneAndDelete({
+  const bank = await Bank.findOne({
     _id: req.params.bankId,
     trader: req.params.traderId,
   });
@@ -137,10 +128,19 @@ export const deleteBank = asyncHandler(async (req, res) => {
     });
   }
 
+  // Delete all ledger entries for this bank
+  await BankLedgerEntry.deleteMany({ bank: req.params.bankId });
+
+  // Delete the bank
+  await Bank.findOneAndDelete({
+    _id: req.params.bankId,
+    trader: req.params.traderId,
+  });
+
   res.status(200).json({
     success: true,
     data: {},
-    message: 'Bank deleted successfully',
+    message: 'Bank and all associated ledger entries deleted successfully',
   });
 });
 

@@ -118,21 +118,12 @@ export const updateTrader = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Delete Trader
+ * @desc    Delete Trader (with cascade delete of banks and ledger entries)
  * @route   DELETE /api/traders/:id
  * @access  Public
  */
 export const deleteTrader = asyncHandler(async (req, res) => {
-  // Check if trader has banks
-  const banks = await Bank.find({ trader: req.params.id });
-  if (banks.length > 0) {
-    return res.status(400).json({
-      success: false,
-      error: 'Cannot delete trader with existing banks. Please delete banks first.',
-    });
-  }
-
-  const trader = await Trader.findByIdAndDelete(req.params.id);
+  const trader = await Trader.findById(req.params.id);
 
   if (!trader) {
     return res.status(404).json({
@@ -141,10 +132,25 @@ export const deleteTrader = asyncHandler(async (req, res) => {
     });
   }
 
+  // Find all banks for this trader
+  const banks = await Bank.find({ trader: req.params.id });
+
+  // Delete all bank ledger entries for all banks of this trader
+  if (banks.length > 0) {
+    const bankIds = banks.map(bank => bank._id);
+    await BankLedgerEntry.deleteMany({ bank: { $in: bankIds } });
+    
+    // Delete all banks for this trader
+    await Bank.deleteMany({ trader: req.params.id });
+  }
+
+  // Delete the trader
+  await Trader.findByIdAndDelete(req.params.id);
+
   res.status(200).json({
     success: true,
     data: {},
-    message: 'Trader deleted successfully',
+    message: 'Trader and all associated data deleted successfully',
   });
 });
 
