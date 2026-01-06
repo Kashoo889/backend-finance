@@ -32,6 +32,11 @@ const bankLedgerEntrySchema = new mongoose.Schema(
       min: [0, 'Amount withdrawn cannot be negative'],
       default: 0,
     },
+    referencePerson: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     remainingAmount: {
       type: Number,
       default: 0,
