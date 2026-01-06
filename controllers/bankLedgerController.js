@@ -23,18 +23,36 @@ export const getBankLedgerEntries = asyncHandler(async (req, res) => {
   }
 
   // Fetch entries sorted by date/createdAt ascending for proper running balance calculation
-  const entries = await BankLedgerEntry.find({ bank: req.params.bankId }).sort({ date: 1, createdAt: 1 });
+  const entries = await BankLedgerEntry.find({
+    bank: req.params.bankId,
+  }).sort({ date: 1, createdAt: 1 });
 
   // Calculate running balance (needs to be calculated from oldest to newest)
   const entriesWithBalance = calculateRunningBalance(entries);
+
+  // Accounting totals
+  const totalCredit = entries.reduce((total, entry) => {
+    const credit = entry.amountAdded || 0;
+    return total + credit;
+  }, 0);
+
+  const totalDebit = entries.reduce((total, entry) => {
+    const debit = entry.amountWithdrawn || 0;
+    return total + debit;
+  }, 0);
+
+  const remainingBalance = totalCredit - totalDebit;
   const totalBalance = calculateBankTotalBalance(entries);
-  
-  // Reverse to show newest entries first
+
+  // Reverse to show newest entries first (latest transaction on top)
   entriesWithBalance.reverse();
 
   res.status(200).json({
     success: true,
     count: entriesWithBalance.length,
+    totalCredit,
+    totalDebit,
+    remainingBalance,
     totalBalance,
     data: entriesWithBalance,
   });
