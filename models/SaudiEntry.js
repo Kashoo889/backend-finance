@@ -15,7 +15,6 @@ const saudiEntrySchema = new mongoose.Schema(
     refNo: {
       type: String,
       required: [true, 'Reference number is required'],
-      unique: true,
       trim: true,
       uppercase: true,
     },
@@ -67,7 +66,7 @@ saudiEntrySchema.pre('save', function (next) {
 
 // Index for faster queries
 saudiEntrySchema.index({ date: -1 });
-saudiEntrySchema.index({ refNo: 1 });
+saudiEntrySchema.index({ refNo: 1 }, { unique: false }); // Non-unique index for query performance
 
 const SaudiEntry = mongoose.model('SaudiEntry', saudiEntrySchema);
 
