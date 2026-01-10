@@ -5,12 +5,15 @@
 
 /**
  * Calculate Riyal Amount: PKR Amount ÷ Riyal Rate
+ * If PKR > 0 AND Rate > 0, calculate. Otherwise return 0 (will use submitted SAR directly)
  */
 export const calculateRiyalAmount = (pkrAmount, riyalRate) => {
-  if (!riyalRate || riyalRate === 0) {
-    throw new Error('Riyal rate cannot be zero');
+  // Only calculate if both PKR and Rate are > 0
+  if (pkrAmount > 0 && riyalRate > 0) {
+    return pkrAmount / riyalRate;
   }
-  return pkrAmount / riyalRate;
+  // If either is 0 or missing, return 0 (system will use submitted SAR directly)
+  return 0;
 };
 
 /**
