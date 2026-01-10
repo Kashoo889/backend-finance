@@ -44,8 +44,8 @@ export const getBankLedgerEntries = asyncHandler(async (req, res) => {
   const remainingBalance = totalCredit - totalDebit;
   const totalBalance = calculateBankTotalBalance(entries);
 
-  // Reverse to show newest entries first (latest transaction on top)
-  entriesWithBalance.reverse();
+  // No need to reverse as we want Oldest First (Ascending)
+  // entriesWithBalance.reverse();
 
   res.status(200).json({
     success: true,
@@ -134,7 +134,7 @@ export const createBankLedgerEntry = asyncHandler(async (req, res) => {
   // Fetch in ascending order for proper running balance calculation, then reverse for display
   const allEntries = await BankLedgerEntry.find({ bank: req.params.bankId }).sort({ date: 1, createdAt: 1 });
   const entriesWithBalance = calculateRunningBalance(allEntries);
-  entriesWithBalance.reverse(); // Show newest first
+  // entriesWithBalance.reverse(); // Show newest first
   const entryWithRunningBalance = entriesWithBalance.find((e) => e._id.toString() === entry._id.toString());
 
   res.status(201).json({
@@ -185,7 +185,7 @@ export const updateBankLedgerEntry = asyncHandler(async (req, res) => {
   // Fetch in ascending order for proper running balance calculation, then reverse for display
   const allEntries = await BankLedgerEntry.find({ bank: req.params.bankId }).sort({ date: 1, createdAt: 1 });
   const entriesWithBalance = calculateRunningBalance(allEntries);
-  entriesWithBalance.reverse(); // Show newest first
+  // entriesWithBalance.reverse(); // Show newest first
   const entryWithRunningBalance = entriesWithBalance.find((e) => e._id.toString() === entry._id.toString());
 
   res.status(200).json({
