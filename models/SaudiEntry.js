@@ -54,18 +54,26 @@ const saudiEntrySchema = new mongoose.Schema(
 );
 
 // Calculate riyalAmount and balance before saving
-// Only auto-calculate if both PKR > 0 AND Rate > 0, otherwise use submittedSar directly
+// RiyalAmount logic:
+//   - If PKR > 0 AND Rate > 0: RiyalAmount = PKR / Rate (auto-calculate)
+//   - Otherwise: RiyalAmount = SubmittedSAR (use submitted directly)
+// Balance logic:
+//   - Always: Balance = RiyalAmount - SubmittedSAR
+//   - When auto-calculating: Balance = (PKR/Rate) - SubmittedSAR
+//   - When using submitted: Balance = SubmittedSAR - SubmittedSAR = 0
 saudiEntrySchema.pre('save', function (next) {
   if (this.pkrAmount > 0 && this.riyalRate > 0) {
-    // Auto-calculate: PKR AMOUNT / RIYAL RATE = RIYAL AMOUNT
+    // Auto-calculate: RiyalAmount = PKR / Rate
     this.riyalAmount = this.pkrAmount / this.riyalRate;
-    // Calculate: RIYAL AMOUNT - SUBMITTED SAR = Balance
-    this.balance = this.riyalAmount - this.submittedSar;
   } else {
-    // If PKR = 0 OR Rate = 0, use submittedSar directly
+    // Use submitted SAR directly as RiyalAmount
     this.riyalAmount = this.submittedSar;
-    this.balance = 0; // No balance calculation when not auto-calculating
   }
+
+  // Balance is always: RiyalAmount - SubmittedSAR
+  // When using submitted directly, this becomes 0
+  this.balance = this.riyalAmount - this.submittedSar;
+
   next();
 });
 
