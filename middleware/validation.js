@@ -40,15 +40,15 @@ export const validateSaudiEntry = [
   body('pkrAmount')
     .optional({ checkFalsy: true })
     .isFloat({ min: 0 })
-    .withMessage('PKR amount must be a positive number'),
+    .withMessage('PKR amount must be 0 or greater'),
   body('riyalRate')
     .optional({ checkFalsy: true })
-    .isFloat({ min: 0.01 })
-    .withMessage('Riyal rate must be greater than zero'),
+    .isFloat({ min: 0 })
+    .withMessage('Riyal rate must be 0 or greater'),
   body('submittedSar')
     .optional({ checkFalsy: true })
     .isFloat({ min: 0 })
-    .withMessage('Submitted SAR must be a positive number'),
+    .withMessage('Submitted SAR must be 0 or greater'),
   body('reference2')
     .optional({ checkFalsy: true })
     .trim(),

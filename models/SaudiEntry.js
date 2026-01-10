@@ -26,7 +26,7 @@ const saudiEntrySchema = new mongoose.Schema(
     riyalRate: {
       type: Number,
       required: [true, 'Riyal rate is required'],
-      min: [0.01, 'Riyal rate must be greater than zero'],
+      min: [0, 'Riyal rate cannot be negative'],
     },
     riyalAmount: {
       type: Number,
@@ -54,12 +54,17 @@ const saudiEntrySchema = new mongoose.Schema(
 );
 
 // Calculate riyalAmount and balance before saving
+// Only auto-calculate if both PKR > 0 AND Rate > 0, otherwise use submittedSar directly
 saudiEntrySchema.pre('save', function (next) {
-  if (this.riyalRate && this.riyalRate !== 0) {
-    // Calculate: PKR AMOUNT / RIYAL RATE = RIYAL AMOUNT
+  if (this.pkrAmount > 0 && this.riyalRate > 0) {
+    // Auto-calculate: PKR AMOUNT / RIYAL RATE = RIYAL AMOUNT
     this.riyalAmount = this.pkrAmount / this.riyalRate;
     // Calculate: RIYAL AMOUNT - SUBMITTED SAR = Balance
     this.balance = this.riyalAmount - this.submittedSar;
+  } else {
+    // If PKR = 0 OR Rate = 0, use submittedSar directly
+    this.riyalAmount = this.submittedSar;
+    this.balance = 0; // No balance calculation when not auto-calculating
   }
   next();
 });
